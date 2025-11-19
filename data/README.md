@@ -40,7 +40,7 @@ Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 ### Links to Publicly Accessible Scripts to Download and Preprocess the Data
 
-[https://github.com/dlnash/SEAK_climatology](https://github.com/dlnash/SEAK_climatology)
+[https://github.com/CW3E/gefsv12_reforecast_downloader_preprocesser](https://github.com/CW3E/gefsv12_reforecast_downloader_preprocesser)
 
 ### Related Datasets
 
