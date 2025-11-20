@@ -1,0 +1,20 @@
+name: gefs_reforecast_env
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.12
+  - numpy
+  - pandas
+  - xarray
+  - netcdf4
+  - scipy
+  - pyyaml
+  - wrf-python
+  - cfgrib
+  - eccodes
+  - pip
+
+  - pip:
+      - boto3        # optional; for AWS interactions if needed
