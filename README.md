@@ -1,5 +1,7 @@
 # GEFSv12 Reforecast Download and Preprocessing Toolkit
 
+* Author: Deanna Nash ([dnash@ucsd.edu](mailto:dnash@ucsd.edu))
+
 This repository provides a set of scripts for **downloading**, **preprocessing**, and **concatenating** selected variables from the **GEFSv12 Reforecast** dataset. The processed outputs include:
 
 * Integrated Water Vapor Transport (**IVT**)
