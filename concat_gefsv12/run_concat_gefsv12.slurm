@@ -4,16 +4,13 @@
 #SBATCH -N 1
 #SBATCH --nodes=1
 #SBATCH --mem=32GB
-#SBATCH -o slurm_out/concat_out_%a
-#SBATCH -e slurm_out/concat_err_%a
 #SBATCH --job-name=concat_gefs_reforecast
+#SBATCH --array=1-730%100 # each call runs 10 days - 7305 days / 10 ≈ 731 jobs
+#SBATCH -o slurm_out/concat_%A_%a.out
+#SBATCH -e slurm_out/concat_%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=dnash@ucsd.edu
-#SBATCH --array=1-999%100 
 
-# Activate conda environment
-source /home/dnash/miniconda3/etc/profile.d/conda.sh
-conda activate SEAK-impacts
+PYTHON="/home/dnash/miniconda3/envs/SEAK-impacts/bin/python"
 
-linevar=`sed $SLURM_ARRAY_TASK_ID'q;d' calls_8.txt`
-eval $linevar
+$PYTHON concat_gefsv12_batch.py

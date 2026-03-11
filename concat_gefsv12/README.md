@@ -6,22 +6,13 @@ This directory contains scripts to **concatenate preprocessed GEFSv12 Reforecast
 
 ## Workflow Overview
 
-1. **Create job configuration files**
+1. **Edit concat_gefsv12_batch.py**
 
-   * Use `create_job_configs.py` to generate `.txt` and `.yaml` files for batching concatenation jobs via SLURM.
-   * Edit `start_date` and `end_date` to specify the range of dates to concatenate.
-   * Run:
-
-   ```bash
-   conda activate gefs_reforecast_env
-   python create_job_configs.py
-   ```
-
-   This generates `calls_varname_x.txt` and `config_varname_x.yaml` files for the SLURM job array.
-
+   * Edit `varname` to reflect the variable you are concatenating.
+    
 2. **Submit SLURM jobs**
 
-   * Update `run_concat_GEFSv12_reforecast.slurm` to point to the correct `calls_varname_x.txt` file.
+   * Update `run_concat_GEFSv12_reforecast.slurm` to ensure #SBATCH --array=0-730%100
    * Submit the job array:
 
    ```bash
