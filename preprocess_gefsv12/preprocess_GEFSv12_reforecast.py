@@ -81,7 +81,7 @@ def process_variable_chunks(variable, date, year):
 # ---------------------------------------------------------------------------
 
 if variable == "qpf":
-    ds = process_qpf(date)
+    ds = calc.process_qpf(date)
     out_file = path_out / f"{date}_qpf.nc"
     print(f"Writing {out_file.name}")
     ds.load().to_netcdf(out_file, format="NETCDF4")

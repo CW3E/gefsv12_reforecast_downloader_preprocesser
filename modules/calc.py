@@ -18,61 +18,31 @@ from pathlib import Path
 
 import read_data as io
 
-
-    
-# ----------------------------- QPF processing -----------------------------
-def convert_accum_precip_to_hourly(ds: xr.Dataset) -> xr.Dataset:
-    """Convert accumulated precipitation (tp) into *incremental* precipitation.
-    
-    
-    The GEFS reforecast files contain accumulated precipitation with a mixture
-    of 3- and 6-hourly steps. This function extracts correct 3-hour values and
-    computes 6-hour increments from differences, then merges them.
-    """
-    tp = ds["tp"] 
-    
-    # Timedelta-based step indices used in original script
-    ts_3hr = pd.timedelta_range(start="0 day", periods=57, freq="3H")
-    ts_6hr = pd.timedelta_range(start="0 day", periods=29, freq="6H")
-    
-    
-    # The original code used slices like [1::2] and [1:] — preserve that logic
-    prec_3hr = tp.sel(step=ts_3hr[1::2])
-    tp_diff = tp.diff(dim="step")
-    prec_6hr = tp_diff.sel(step=ts_6hr[1:])
-    
-    
-    new_prec = prec_3hr.combine_first(prec_6hr)
-    new_prec.name = "tp"
-    
-    
-    ds = ds.drop_vars(["tp"])
-    ds = xr.merge([ds, new_prec])
-    return ds
-
 def process_qpf(date):
     """Process accumulated precip into hourly series."""
-    path_downloads = get_download_path(date)
+    path_downloads = io.get_download_path(date)
     ctrl_file = path_downloads / f"apcp_sfc_{date}00_c00.grib2"
     ens_pattern = str(path_downloads / f"apcp_sfc_{date}00_p*.grib2")
 
     # Load control
     dsa = xr.open_dataset(ctrl_file, engine="cfgrib",
-                          filter_by_keys={"dataType": "cf"}).expand_dims("number")
+                          filter_by_keys={"dataType": "cf"},
+                          decode_timedelta=True).expand_dims("number")
 
     # Load ensemble members
     dsb = xr.open_mfdataset(ens_pattern, engine="cfgrib",
                             concat_dim="number", combine="nested",
-                            filter_by_keys={"dataType": "pf"})
+                            filter_by_keys={"dataType": "pf"},
+                            decode_timedelta=True)
 
     # Combine control + members
-    ds = xr.concat([dsa, dsb], dim="number", coords="minimal", compat="override")
+    ds = xr.concat([dsa, dsb], dim="number", coords="minimal", compat="override", join="outer")
 
     # Fix longitude and subset domain
     ds = io.clean_coords(ds)
 
-    # Convert accumulated precip → hourly
-    ds = convert_accum_precip_to_hourly(ds)
+    # rename variable from tp to qpf for future processing
+    ds = ds.rename_vars({"tp": "qpf"})
 
     return ds
     

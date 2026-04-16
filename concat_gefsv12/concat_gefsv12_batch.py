@@ -20,7 +20,7 @@ START_DATE = "2000-01-01"
 END_DATE   = "2019-12-31"
 DAYS_PER_JOB = 10
 
-varname = "freezing_level"
+varname = "ivt" ## 'ivt', 'freezing_level', 'uv'
 
 # -----------------------------
 # Get SLURM task id
@@ -90,6 +90,10 @@ for dt in date_subset:
     
     # Make sure forecast steps are sorted
     forecast = forecast.sortby("step")
+
+    # calculate wind magnitude
+    if varname == 'uv':
+        forecast["uv"] = np.sqrt(forecast['u']**2 + forecast['v']**2)
     
     
     # -----------------------------
@@ -103,6 +107,8 @@ for dt in date_subset:
                  "units": "kg m-1 s-1"},
         "ivtv": {"long_name": "meridional integrated water vapor transport",
                  "units": "kg m-1 s-1"},
+        "uv": {"long_name": "wind magnitude",
+               "units": "m s-1"},
     }
     
     for var, attrs in var_attrs.items():
@@ -119,9 +125,29 @@ for dt in date_subset:
     # -----------------------------
     # Rename dimension (if present)
     # -----------------------------
-    if "time" in forecast.dims:
-        forecast = forecast.rename({"time": "init_time"})
+    rename_dict = {}
+
+    # rename coords if they exist
+    if "time" in forecast.coords or "time" in forecast.dims:
+        rename_dict["time"] = "init_time"
+    elif "init_time" not in forecast.coords:
+        # fallback: create from metadata
+        np_date = pd.to_datetime(
+            forecast.attrs["init_date"],
+            format="%Y%m%d"
+        ).to_datetime64()
+        forecast = forecast.assign_coords(init_time=np_date)
     
+    # spatial renaming
+    if "lat" in forecast.coords or "lat" in forecast.dims:
+        rename_dict["lat"] = "latitude"
+    
+    if "lon" in forecast.coords or "lon" in forecast.dims:
+        rename_dict["lon"] = "longitude"
+    
+    # apply renames once
+    if rename_dict:
+        forecast = forecast.rename(rename_dict)
     
     # -----------------------------
     # Drop unneeded variables
