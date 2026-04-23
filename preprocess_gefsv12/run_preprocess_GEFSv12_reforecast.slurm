@@ -15,5 +15,5 @@
 source /home/dnash/miniconda3/etc/profile.d/conda.sh
 conda activate SEAK-impacts
 
-linevar=`sed $SLURM_ARRAY_TASK_ID'q;d' calls_qpf_7.txt`
+linevar=`sed $SLURM_ARRAY_TASK_ID'q;d' calls_qpf_8.txt`
 eval $linevar

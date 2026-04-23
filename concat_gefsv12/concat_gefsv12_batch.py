@@ -6,6 +6,7 @@ Description: Concatenate GEFSv12 Reforecast data to daily netCDF files, and upda
 
 import xarray as xr
 import pandas as pd
+import numpy as np
 import os
 import sys
 import glob
@@ -20,7 +21,7 @@ START_DATE = "2000-01-01"
 END_DATE   = "2019-12-31"
 DAYS_PER_JOB = 10
 
-varname = "ivt" ## 'ivt', 'freezing_level', 'uv'
+varname = "uv" ## 'ivt', 'freezing_level', 'uv'
 
 # -----------------------------
 # Get SLURM task id
@@ -128,15 +129,13 @@ for dt in date_subset:
     rename_dict = {}
 
     # rename coords if they exist
-    if "time" in forecast.coords or "time" in forecast.dims:
-        rename_dict["time"] = "init_time"
-    elif "init_time" not in forecast.coords:
+    if "time" not in forecast.coords:
         # fallback: create from metadata
         np_date = pd.to_datetime(
             forecast.attrs["init_date"],
             format="%Y%m%d"
         ).to_datetime64()
-        forecast = forecast.assign_coords(init_time=np_date)
+        forecast = forecast.assign_coords(time=np_date)
     
     # spatial renaming
     if "lat" in forecast.coords or "lat" in forecast.dims:
